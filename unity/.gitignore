@@ -1,0 +1,14 @@
+
+/Builds/
+/output/
+/Temp/
+/Logs/
+/Library/
+/UserSettings/
+/obj/
+/*.csproj
+/*.sln
+
+
+
+

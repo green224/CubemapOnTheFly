@@ -1,0 +1,16 @@
+{
+    "name": "App",
+    "rootNamespace": "",
+    "references": [
+        "CubemapGenerator"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
