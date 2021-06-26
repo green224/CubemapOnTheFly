@@ -1,3 +1,4 @@
+﻿// キューブマップのデバッグ用マテリアル
 Shader "CubemapGenerator/CubemapGenerator_Debugger"
 {
 	Properties
@@ -7,7 +8,7 @@ Shader "CubemapGenerator/CubemapGenerator_Debugger"
 
 	SubShader
 	{
-		Tags{
+		Tags {
 			"RenderType" = "Opaque"
 			"RenderPipeline" = "UniversalPipeline"
 			"IgnoreProjector" = "True"
@@ -26,7 +27,6 @@ Shader "CubemapGenerator/CubemapGenerator_Debugger"
 			Tags{"LightMode" = "UniversalForward"}
 
 			HLSLPROGRAM
-			#pragma only_renderers gles gles3 glcore d3d11
 			#pragma target 2.0
 
 			#include "Packages/com.unity.render-pipelines.universal/ShaderLibrary/Core.hlsl"

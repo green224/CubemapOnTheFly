@@ -53,7 +53,7 @@ sealed class Builder_NoUsePlugin : Builder_Base {
 
 		// Texture2Dからピクセル情報を吸出してキャッシュに格納
 		var pd = new PixelDataCache(true);
-		pd.readFromTex2D(_tmpTex2D, false, true);
+		pd.readFromTex2D(_tmpTex2D, false, false);
 		_pixels[(int)faceIndex] = pd;
 
 

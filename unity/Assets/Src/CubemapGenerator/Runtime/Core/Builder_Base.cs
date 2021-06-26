@@ -111,9 +111,30 @@ abstract class Builder_Base : IDisposable {
 		camTrans.rotation = rot;
 		camTrans.position = _pos;
 
-		// RTにレンダリング
+		// カメラのレンダリング対象を割り当て。
+		// ※ ResetProjectionMatrixより前に割り当てておく必要がある
 		_camera.targetTexture = rt;
+
+		// そのままだとCubemapに張り付けた際に上下反転するので、
+		// Projection行列を変更して反転しないようにする
+		_camera.ResetProjectionMatrix();
+		var prjMtx = (float4x4)_camera.projectionMatrix;
+		prjMtx = mul(
+			float4x4(
+				float4(1,0,0,0),
+				float4(0,-1,0,0),
+				float4(0,0,1,0),
+				float4(0,0,0,1)
+			),
+			prjMtx
+		);
+		_camera.projectionMatrix = prjMtx;
+
+		// RTにレンダリング
+		var lastIC = GL.invertCulling;
+		GL.invertCulling = true;
 		UnityEngine.Rendering.Universal.UniversalRenderPipeline.RenderSingleCamera(context, _camera);
+		GL.invertCulling = lastIC;
 		_camera.targetTexture = null;
 	}
 

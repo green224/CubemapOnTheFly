@@ -35,8 +35,10 @@ sealed class Builder_UsePlugin : Builder_Base {
 			throw new InvalidProgramException();
 
 		// レンダリング先のRTを確保
-		var desc = new RenderTextureDescriptor(_texSize, _texSize, RenderTextureFormat.ARGB32);
-		desc.sRGB = false;
+		var desc = new RenderTextureDescriptor(
+			_texSize, _texSize, RenderTextureFormat.ARGB32, 16
+		);
+//		desc.sRGB = false;
 		var rt = new RenderTexture(desc);
 		_rt[ (int)faceIndex ] = rt;
 
@@ -67,7 +69,7 @@ sealed class Builder_UsePlugin : Builder_Base {
 	override protected void disposeCore() {
 
 		if (_rt!=null)
-			foreach (var i in _rt) i.Release();
+			foreach (var i in _rt) i?.Release();
 		_rt = null;
 	}
 
