@@ -1856,6 +1856,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   _camera: {fileID: 1237604737}
+  _usePlugin: 1
   _frameCntBetweenSteps: 1
   _renderCntPerSteps: 1
 --- !u!4 &566413654

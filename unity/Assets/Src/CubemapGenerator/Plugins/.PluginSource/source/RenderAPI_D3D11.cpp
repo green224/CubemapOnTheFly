@@ -16,14 +16,14 @@ class RenderAPI_D3D11 : public RenderAPI
 {
 public:
 	RenderAPI_D3D11()
-		: s_D3D11(nullptr)
+		: _d3d11(nullptr)
 	{}
 	virtual ~RenderAPI_D3D11() { }
 
 	virtual void ProcessDeviceEvent(UnityGfxDeviceEventType type, IUnityInterfaces* interfaces) {
 		switch (type) {
 		case kUnityGfxDeviceEventInitialize:
-			s_D3D11 = interfaces->Get<IUnityGraphicsD3D11>();
+			_d3d11 = interfaces->Get<IUnityGraphicsD3D11>();
 			break;
 		case kUnityGfxDeviceEventShutdown:
 			break;
@@ -40,7 +40,7 @@ public:
 		void* cubemapTex,
 		int texWidth
 	) {
-		auto device = s_D3D11->GetDevice();
+		auto device = _d3d11->GetDevice();
 		ID3D11DeviceContext* ctx = nullptr;
 		device->GetImmediateContext(&ctx);
 
@@ -64,7 +64,7 @@ public:
 	}
 
 private:
-	IUnityGraphicsD3D11* s_D3D11;
+	IUnityGraphicsD3D11* _d3d11;
 };
 
 

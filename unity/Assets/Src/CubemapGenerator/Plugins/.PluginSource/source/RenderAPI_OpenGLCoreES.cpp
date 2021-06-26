@@ -33,7 +33,7 @@ class RenderAPI_OpenGLCoreES : public RenderAPI
 {
 public:
 	RenderAPI_OpenGLCoreES(UnityGfxRenderer apiType)
-		: m_APIType(apiType)
+		: _apiType(apiType)
 		, _frameBuffer(NULL)
 	{}
 	virtual ~RenderAPI_OpenGLCoreES() {}
@@ -87,13 +87,13 @@ public:
 	}
 
 private:
-	UnityGfxRenderer m_APIType;
+	UnityGfxRenderer _apiType;
 	GLuint _frameBuffer;
 
 	/** このクラスで使用し続けるリソース類を最初に作成する処理 */
 	void CreateResources() {
 		#	if SUPPORT_OPENGL_CORE && UNITY_WIN
-			if (m_APIType == kUnityGfxRendererOpenGLCore)
+			if (_apiType == kUnityGfxRendererOpenGLCore)
 				gl3wInit();
 		#	endif
 

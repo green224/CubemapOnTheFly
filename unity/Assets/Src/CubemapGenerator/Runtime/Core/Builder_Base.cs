@@ -15,7 +15,7 @@ namespace CubemapGenerator.Core {
  * これ自体も使用後はDisposeする必要があるが、
  * 生成したCubemapも、扱う側で不要になった際にDisposeする必要がある。
  */
-sealed class Builder : IDisposable {
+abstract class Builder_Base : IDisposable {
 	// ------------------------------------- public メンバ ----------------------------------------
 
 	/** 作成が完了したか否か */
@@ -26,7 +26,7 @@ sealed class Builder : IDisposable {
 
 
 	/** 使用するカメラ、パラメータを指定してレンダリングを開始する準備をする */
-	public Builder(Camera camera, int texSize, float3 pos) {
+	public Builder_Base(Camera camera, int texSize, float3 pos) {
 		_camera = camera;
 		_texSize = texSize;
 		_pos = pos;
@@ -43,10 +43,6 @@ sealed class Builder : IDisposable {
 	public void proceed(UnityEngine.Rendering.ScriptableRenderContext context) {
 		if (_isDisposed) throw new InvalidOperationException();
 
-		// コンストラクタでメモリ確保を極力したくないので、_tmpTex2Dはここで生成する。
-		if (_tmpTex2D == null) _tmpTex2D = new Texture2D(_texSize, _texSize, TextureFormat.ARGB32, false, true);
-
-
 		switch (_proccessIdx++) {
 
 		// 0~5までは各面のレンダリングを行う
@@ -60,14 +56,7 @@ sealed class Builder : IDisposable {
 		// 各面のレンダリングが終了したら、キューブマップに格納する。
 		// このキューブマップはDisposeされても解放されないので、使用する側で開放する必要があることに注意。
 		case 6:
-			Result = new Cubemap(_texSize, TextureFormat.ARGB32, 1);
-			for (int i=0; i<6; ++i)
-				_pixels[i].writeToCubemap( Result, (CubemapFace)i );
-			Result.Apply(false, true);
-
-			foreach (var i in _pixels) i.Dispose();
-			UnityEngine.Object.DestroyImmediate(_tmpTex2D);
-
+			Result = compileCubemap(context);
 			IsComplete = true;
 			break;
 
@@ -79,11 +68,8 @@ sealed class Builder : IDisposable {
 	public void Dispose() {
 		if (_isDisposed) return;
 
-		foreach (var i in _pixels) i.Dispose();
-		_pixels = null;
+		disposeCore();
 
-		if (_tmpTex2D!=null) UnityEngine.Object.DestroyImmediate(_tmpTex2D);
-		_tmpTex2D = null;
 		_isDisposed = true;
 	}
 
@@ -94,19 +80,22 @@ sealed class Builder : IDisposable {
 	int _proccessIdx = 0;		//!< 処理の進行カウント
 
 	Camera _camera;
-	int _texSize;
+	protected int _texSize;
 	float3 _pos;
-
-	PixelDataCache[] _pixels = new PixelDataCache[6];		//!< 各面のレンダリング結果のキャッシュ
-	Texture2D _tmpTex2D;		//!< RTからピクセル情報を取得するためのテンポラリバッファ
 
 
 	/** 指定の方向の面をレンダリングする処理 */
-	void renderFace(
+	abstract protected void renderFace(
+		UnityEngine.Rendering.ScriptableRenderContext context,
+		CubemapFace faceIndex
+	);
+
+	/** 指定の方向の面をレンダリングする処理のコア部分 */
+	protected void renderFace(
+		RenderTexture rt,
 		UnityEngine.Rendering.ScriptableRenderContext context,
 		CubemapFace faceIndex
 	) {
-
 		// カメラの姿勢を決定
 		Quaternion rot;
 		switch (faceIndex) {
@@ -122,36 +111,21 @@ sealed class Builder : IDisposable {
 		camTrans.rotation = rot;
 		camTrans.position = _pos;
 
-		// レンダリング先のRTを確保
-		var desc = new RenderTextureDescriptor(_texSize, _texSize, RenderTextureFormat.ARGB32);
-		desc.sRGB = false;
-		var rt = RenderTexture.GetTemporary(desc);
-
 		// RTにレンダリング
 		_camera.targetTexture = rt;
 		UnityEngine.Rendering.Universal.UniversalRenderPipeline.RenderSingleCamera(context, _camera);
 		_camera.targetTexture = null;
-
-		// レンダリング結果をTexture2Dへ転写
-		var lastRTTgt = RenderTexture.active;
-		RenderTexture.active = rt;
-		_tmpTex2D.ReadPixels(new Rect(0, 0, _texSize, _texSize), 0, 0);
-		_tmpTex2D.Apply(false);
-		RenderTexture.active = lastRTTgt;
-
-		// Texture2Dからピクセル情報を吸出してキャッシュに格納
-		var pd = new PixelDataCache(true);
-		pd.readFromTex2D(_tmpTex2D, false, true);
-		_pixels[(int)faceIndex] = pd;
-
-
-		RenderTexture.ReleaseTemporary(rt);
 	}
 
-	~Builder() {
+	/** 各面をレンダリングした結果からキューブマップを生成する */
+	abstract protected Cubemap compileCubemap(UnityEngine.Rendering.ScriptableRenderContext context);
+
+	/** 破棄処理本体。これを派生先から実装する */
+	abstract protected void disposeCore();
+
+	~Builder_Base() {
 		if (!_isDisposed) throw new InvalidProgramException();
 	}
-
 
 
 	// --------------------------------------------------------------------------------------------

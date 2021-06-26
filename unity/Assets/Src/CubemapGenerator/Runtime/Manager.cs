@@ -19,6 +19,7 @@ public sealed class Manager : MonoBehaviour {
 
 	/** レンダリングに使用するカメラ */
 	[SerializeField] Camera _camera = null;
+	[SerializeField] bool _usePlugin = true;
 
 	[Space]
 
@@ -41,7 +42,8 @@ public sealed class Manager : MonoBehaviour {
 			_camera, texSize, pos,
 			onComplete,
 			onBeginRenderPerFrame,
-			onEndRenderPerFrame
+			onEndRenderPerFrame,
+			_usePlugin
 		) );
 
 		// 現在処理中のタスクがない場合は、即実行

@@ -19,9 +19,13 @@ sealed class BuilderPlan : IDisposable {
 	public BuilderPlan(
 		Camera camera, int texSize, float3 pos,
 		Action<Cubemap> onComplete,
-		Action onBeginRender, Action onEndRender
+		Action onBeginRender, Action onEndRender,
+		bool usePluginVer
 	) {
-		_renderer = new Builder(camera, texSize, pos);
+		if (usePluginVer)
+			_renderer = new Builder_UsePlugin(camera, texSize, pos);
+		else
+			_renderer = new Builder_NoUsePlugin(camera, texSize, pos);
 		_onComplete = onComplete;
 		_onBeginRender = onBeginRender;
 		_onEndRender = onEndRender;
@@ -67,7 +71,7 @@ sealed class BuilderPlan : IDisposable {
 
 	// --------------------------------- private / protected メンバ -------------------------------
 
-	Core.Builder _renderer;
+	Builder_Base _renderer;
 	readonly Action _onBeginRender, _onEndRender;
 	Action<Cubemap> _onComplete;
 

@@ -18,18 +18,18 @@ class RenderAPI_D3D12 : public RenderAPI
 {
 public:
 	RenderAPI_D3D12()
-		: s_D3D12(nullptr)
-		, s_D3D12CmdAlloc(nullptr)
-		, s_D3D12CmdList(nullptr)
-		, s_D3D12FenceValue(0)
-		, s_D3D12Event(nullptr)
+		: _d3d12(nullptr)
+		, _d3d12CmdAlloc(nullptr)
+		, _d3d12CmdList(nullptr)
+		, _d3d12FenceValue(0)
+		, _d3d12Event(nullptr)
 	{}
 	virtual ~RenderAPI_D3D12() {}
 
 	virtual void ProcessDeviceEvent(UnityGfxDeviceEventType type, IUnityInterfaces* interfaces) {
 		switch (type) {
 		case kUnityGfxDeviceEventInitialize:
-			s_D3D12 = interfaces->Get<IUnityGraphicsD3D12v2>();
+			_d3d12 = interfaces->Get<IUnityGraphicsD3D12v2>();
 			CreateResources();
 			break;
 		case kUnityGfxDeviceEventShutdown:
@@ -50,15 +50,15 @@ public:
 	) {
 
 		// Wait on the previous job (example only - simplifies resource management)
-		auto fence = s_D3D12->GetFrameFence();
-		if (fence->GetCompletedValue() < s_D3D12FenceValue) {
-			fence->SetEventOnCompletion(s_D3D12FenceValue, s_D3D12Event);
-			WaitForSingleObject(s_D3D12Event, INFINITE);
+		auto fence = _d3d12->GetFrameFence();
+		if (fence->GetCompletedValue() < _d3d12FenceValue) {
+			fence->SetEventOnCompletion(_d3d12FenceValue, _d3d12Event);
+			WaitForSingleObject(_d3d12Event, INFINITE);
 		}
 
 		// Begin a command list
-		s_D3D12CmdAlloc->Reset();
-		s_D3D12CmdList->Reset(s_D3D12CmdAlloc, nullptr);
+		_d3d12CmdAlloc->Reset();
+		_d3d12CmdList->Reset(_d3d12CmdAlloc, nullptr);
 
 
 
@@ -85,9 +85,9 @@ public:
 			dstLoc.Type = D3D12_TEXTURE_COPY_TYPE_SUBRESOURCE_INDEX;
 			dstLoc.SubresourceIndex = i;
 
-			s_D3D12CmdList->CopyTextureRegion(&dstLoc, 0, 0, 0, &srcLoc, nullptr);
+			_d3d12CmdList->CopyTextureRegion(&dstLoc, 0, 0, 0, &srcLoc, nullptr);
 		}
-		s_D3D12CmdList->Close();
+		_d3d12CmdList->Close();
 
 		// We inform Unity that we expect this resource to be in D3D12_RESOURCE_STATE_COPY_DEST state,
 		// and because we do not barrier it ourselves, we tell Unity that no changes are done on our command list.
@@ -95,40 +95,40 @@ public:
 		resourceState.resource = dstTex;
 		resourceState.expected = D3D12_RESOURCE_STATE_COPY_DEST;
 		resourceState.current = D3D12_RESOURCE_STATE_COPY_DEST;
-		s_D3D12FenceValue = s_D3D12->ExecuteCommandList(s_D3D12CmdList, 1, &resourceState);
+		_d3d12FenceValue = _d3d12->ExecuteCommandList(_d3d12CmdList, 1, &resourceState);
 	}
 
 private:
 	const UINT kNodeMask = 0;
-	IUnityGraphicsD3D12v2* s_D3D12;
-	ID3D12CommandAllocator* s_D3D12CmdAlloc;
-	ID3D12GraphicsCommandList* s_D3D12CmdList;
-	UINT64 s_D3D12FenceValue = 0;
-	HANDLE s_D3D12Event = nullptr;
+	IUnityGraphicsD3D12v2* _d3d12;
+	ID3D12CommandAllocator* _d3d12CmdAlloc;
+	ID3D12GraphicsCommandList* _d3d12CmdList;
+	UINT64 _d3d12FenceValue = 0;
+	HANDLE _d3d12Event = nullptr;
 
 	/** このクラスで使用し続けるリソース類を最初に作成する処理 */
 	void CreateResources() {
-		auto device = s_D3D12->GetDevice();
+		auto device = _d3d12->GetDevice();
 
 		HRESULT hr = E_FAIL;
 
 		// Command list
-		hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&s_D3D12CmdAlloc));
+		hr = device->CreateCommandAllocator(D3D12_COMMAND_LIST_TYPE_DIRECT, IID_PPV_ARGS(&_d3d12CmdAlloc));
 		if (FAILED(hr)) OutputDebugStringA("Failed to CreateCommandAllocator.\n");
-		hr = device->CreateCommandList(kNodeMask, D3D12_COMMAND_LIST_TYPE_DIRECT, s_D3D12CmdAlloc, nullptr, IID_PPV_ARGS(&s_D3D12CmdList));
+		hr = device->CreateCommandList(kNodeMask, D3D12_COMMAND_LIST_TYPE_DIRECT, _d3d12CmdAlloc, nullptr, IID_PPV_ARGS(&_d3d12CmdList));
 		if (FAILED(hr)) OutputDebugStringA("Failed to CreateCommandList.\n");
-		s_D3D12CmdList->Close();
+		_d3d12CmdList->Close();
 
 		// Fence
-		s_D3D12FenceValue = 0;
-		s_D3D12Event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
+		_d3d12FenceValue = 0;
+		_d3d12Event = CreateEvent(nullptr, FALSE, FALSE, nullptr);
 	}
 
 	/** このクラスで使用し続けるリソース類を最後に破棄する処理 */
 	void ReleaseResources() {
-		if (s_D3D12Event) CloseHandle(s_D3D12Event);
-		SAFE_RELEASE(s_D3D12CmdList);
-		SAFE_RELEASE(s_D3D12CmdAlloc);
+		if (_d3d12Event) CloseHandle(_d3d12Event);
+		SAFE_RELEASE(_d3d12CmdList);
+		SAFE_RELEASE(_d3d12CmdAlloc);
 	}
 };
 
