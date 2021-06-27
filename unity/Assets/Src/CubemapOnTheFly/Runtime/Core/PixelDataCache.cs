@@ -8,7 +8,7 @@ using Unity.Collections;
 
 
 
-namespace CubemapGenerator.Core {
+namespace CubemapOnTheFly.Core {
 
 /**
  * テクスチャのピクセル情報のキャッシュ。

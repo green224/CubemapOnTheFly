@@ -20,7 +20,7 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: CubemapGenerator_Debugger
+  m_Name: CubemapOnTheFly_Debugger
   m_Shader: {fileID: 4800000, guid: f5cd4544d7a0e6f44963acaa59ddc893, type: 3}
   m_ShaderKeywords: 
   m_LightmapFlags: 4

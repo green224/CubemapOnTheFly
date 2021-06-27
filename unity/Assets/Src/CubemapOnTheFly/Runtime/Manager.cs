@@ -6,7 +6,7 @@ using static Unity.Mathematics.math;
 using System.Collections.Generic;
 
 
-namespace CubemapGenerator {
+namespace CubemapOnTheFly {
 
 /**
  * ランタイムでキューブマップを生成するためのモジュール。

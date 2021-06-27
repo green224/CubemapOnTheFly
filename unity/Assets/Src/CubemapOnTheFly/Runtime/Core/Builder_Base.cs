@@ -6,7 +6,7 @@ using static Unity.Mathematics.math;
 
 
 
-namespace CubemapGenerator.Core {
+namespace CubemapOnTheFly.Core {
 
 /**
  * キューブマップをレンダリングするコア処理部分。

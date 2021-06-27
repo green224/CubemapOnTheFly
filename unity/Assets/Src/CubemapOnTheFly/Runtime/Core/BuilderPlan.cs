@@ -5,7 +5,7 @@ using Unity.Mathematics;
 using static Unity.Mathematics.math;
 
 
-namespace CubemapGenerator.Core {
+namespace CubemapOnTheFly.Core {
 
 /**
  * レンダリングの予約用データ。

@@ -7,7 +7,7 @@ using UnityEngine.UI;
 public class Game : MonoBehaviour {
 	// ----------------------------- インスペクタに公開しているフィールド -----------------------------
 
-	[SerializeField] CubemapGenerator.Debugger _cmGenDebugger = null;
+	[SerializeField] CubemapOnTheFly.Debugger _cmGenDebugger = null;
 
 	[Space]
 	[SerializeField] Button _btn_reload = null;

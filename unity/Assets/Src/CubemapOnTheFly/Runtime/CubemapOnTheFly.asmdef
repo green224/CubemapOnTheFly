@@ -1,5 +1,5 @@
 {
-    "name": "CubemapGenerator",
+    "name": "CubemapOnTheFly",
     "rootNamespace": "",
     "references": [
         "Unity.Mathematics",

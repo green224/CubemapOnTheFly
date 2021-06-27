@@ -8,7 +8,7 @@ using UnityEngine.Rendering;
 using UnityEngine.Rendering.Universal;
 
 
-namespace CubemapGenerator.Core {
+namespace CubemapOnTheFly.Core {
 
 /**
  * レンダリング時の処理フック

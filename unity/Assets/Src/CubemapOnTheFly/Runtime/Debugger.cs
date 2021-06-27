@@ -2,7 +2,7 @@ using System;
 using UnityEngine;
 
 
-namespace CubemapGenerator {
+namespace CubemapOnTheFly {
 
 /**
  * デバッグ用コンポーネント。

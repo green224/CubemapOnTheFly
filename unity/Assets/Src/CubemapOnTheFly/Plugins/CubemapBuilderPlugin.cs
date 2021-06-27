@@ -3,7 +3,7 @@ using UnityEngine;
 using System.Runtime.InteropServices;
 
 
-namespace CubemapGenerator.Plugin {
+namespace CubemapOnTheFly.Plugin {
 
 /**
  * NativePlugin部分のラッパー

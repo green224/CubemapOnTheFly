@@ -6,71 +6,75 @@ using static Unity.Mathematics.math;
 
 
 
-namespace CubemapGenerator.Core {
+namespace CubemapOnTheFly.Core {
 
 /**
  * キューブマップをレンダリングするコア処理部分。
  * 
- * RTからCubemapにBlitして生成するバージョン。
- * Nativeプラグインを使用して生成する。
+ * RTをCubemapとして直接使用するバージョン。
  */
-sealed class Builder_BlitUsePlugin : Builder_Base {
+sealed class Builder_DirectRT : Builder_Base {
 	// ------------------------------------- public メンバ ----------------------------------------
 
 	/** 使用するカメラ、パラメータを指定してレンダリングを開始する準備をする */
-	public Builder_BlitUsePlugin(Camera camera, int texSize, float3 pos)
-		: base(camera, texSize, pos) {}
+	public Builder_DirectRT(Camera camera, int texSize, float3 pos, Shader blitShader)
+		: base(camera, texSize, pos)
+	{
+		if (s_blitMtl == null)
+			s_blitMtl = new Material(blitShader);
+	}
 
 
 	// --------------------------------- private / protected メンバ -------------------------------
 
-	RenderTexture[] _rt = new RenderTexture[6];
+	static Material s_blitMtl;
+	RenderTexture _cubemapRT;
 
 	/** 指定の方向の面をレンダリングする処理 */
 	override protected void renderFace(
 		UnityEngine.Rendering.ScriptableRenderContext context,
 		CubemapFace faceIndex
 	) {
-		if (_rt[ (int)faceIndex ] != null)
-			throw new InvalidProgramException();
+		// キューブマップ本体のRTを確保
+		if (_cubemapRT == null) {
+			_cubemapRT = new RenderTexture(
+				new RenderTextureDescriptor(
+					_texSize, _texSize,
+					RenderTextureFormat.ARGB32
+				) {
+					dimension = UnityEngine.Rendering.TextureDimension.Cube
+				}
+			);
+		}
 
 		// レンダリング先のRTを確保
 		var desc = new RenderTextureDescriptor(
 			_texSize, _texSize, RenderTextureFormat.ARGB32, 16
 		);
-//		desc.sRGB = false;
-		var rt = new RenderTexture(desc);
-		_rt[ (int)faceIndex ] = rt;
+		var rt = RenderTexture.GetTemporary(desc);
 
 		// RTにレンダリング
 		renderFace(rt, context, faceIndex);
+
+		// キューブマップへBlit
+		Graphics.SetRenderTarget( _cubemapRT, 0, faceIndex );
+		Graphics.Blit( rt, s_blitMtl );
+		RenderTexture.active = null;
 	}
 
 	/** 各面をレンダリングした結果からキューブマップを生成する */
 	override protected Texture compileCubemap(UnityEngine.Rendering.ScriptableRenderContext context) {
-		var ret = new Cubemap(_texSize, TextureFormat.ARGB32, 1);
-
-		// プラグインでキューブマップへBlitする
-		Plugin.CubemapBuilderPlugin.blitTex2Cubemap(
-			_rt[0].GetNativeTexturePtr(),
-			_rt[1].GetNativeTexturePtr(),
-			_rt[2].GetNativeTexturePtr(),
-			_rt[3].GetNativeTexturePtr(),
-			_rt[4].GetNativeTexturePtr(),
-			_rt[5].GetNativeTexturePtr(),
-			ret.GetNativeTexturePtr(),
-			_texSize
-		);
-
+		// キューブマップを直接RTとしてレンダリングしているので、ここは返すだけでいい
+		var ret = _cubemapRT;
+		_cubemapRT = null;
 		return ret;
 	}
 
 	/** 破棄処理本体 */
 	override protected void disposeCore() {
 
-		if (_rt != null)
-			foreach (var i in _rt) i?.Release();
-		_rt = null;
+		if (_cubemapRT != null) _cubemapRT.Release();
+		_cubemapRT = null;
 	}
 
 
