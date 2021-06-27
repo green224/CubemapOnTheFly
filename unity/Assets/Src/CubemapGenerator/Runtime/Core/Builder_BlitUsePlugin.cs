@@ -3,7 +3,6 @@ using UnityEngine;
 
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
-using Unity.Collections;
 
 
 
@@ -12,13 +11,14 @@ namespace CubemapGenerator.Core {
 /**
  * キューブマップをレンダリングするコア処理部分。
  * 
+ * RTからCubemapにBlitして生成するバージョン。
  * Nativeプラグインを使用して生成する。
  */
-sealed class Builder_UsePlugin : Builder_Base {
+sealed class Builder_BlitUsePlugin : Builder_Base {
 	// ------------------------------------- public メンバ ----------------------------------------
 
 	/** 使用するカメラ、パラメータを指定してレンダリングを開始する準備をする */
-	public Builder_UsePlugin(Camera camera, int texSize, float3 pos)
+	public Builder_BlitUsePlugin(Camera camera, int texSize, float3 pos)
 		: base(camera, texSize, pos) {}
 
 
@@ -47,7 +47,7 @@ sealed class Builder_UsePlugin : Builder_Base {
 	}
 
 	/** 各面をレンダリングした結果からキューブマップを生成する */
-	override protected Cubemap compileCubemap(UnityEngine.Rendering.ScriptableRenderContext context) {
+	override protected Texture compileCubemap(UnityEngine.Rendering.ScriptableRenderContext context) {
 		var ret = new Cubemap(_texSize, TextureFormat.ARGB32, 1);
 
 		// プラグインでキューブマップへBlitする
@@ -68,7 +68,7 @@ sealed class Builder_UsePlugin : Builder_Base {
 	/** 破棄処理本体 */
 	override protected void disposeCore() {
 
-		if (_rt!=null)
+		if (_rt != null)
 			foreach (var i in _rt) i?.Release();
 		_rt = null;
 	}

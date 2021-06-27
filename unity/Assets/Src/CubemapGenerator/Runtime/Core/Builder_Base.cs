@@ -3,7 +3,6 @@ using UnityEngine;
 
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
-using Unity.Collections;
 
 
 
@@ -22,7 +21,7 @@ abstract class Builder_Base : IDisposable {
 	public bool IsComplete {get; private set;}
 
 	/** 作成結果のキューブマップ。これは不要になったら使用する側で開放すること */
-	public Cubemap Result {get; private set;}
+	public Texture Result {get; private set;}
 
 
 	/** 使用するカメラ、パラメータを指定してレンダリングを開始する準備をする */
@@ -139,7 +138,7 @@ abstract class Builder_Base : IDisposable {
 	}
 
 	/** 各面をレンダリングした結果からキューブマップを生成する */
-	abstract protected Cubemap compileCubemap(UnityEngine.Rendering.ScriptableRenderContext context);
+	abstract protected Texture compileCubemap(UnityEngine.Rendering.ScriptableRenderContext context);
 
 	/** 破棄処理本体。これを派生先から実装する */
 	abstract protected void disposeCore();

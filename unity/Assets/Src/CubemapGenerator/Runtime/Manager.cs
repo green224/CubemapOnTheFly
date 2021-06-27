@@ -19,7 +19,8 @@ public sealed class Manager : MonoBehaviour {
 
 	/** レンダリングに使用するカメラ */
 	[SerializeField] Camera _camera = null;
-	[SerializeField] bool _usePlugin = true;
+	/** Blitに使用するシェーダ。これは自動で代入される */
+	[SerializeField][HideInInspector] Shader _blitShader = null;
 
 	[Space]
 
@@ -29,12 +30,19 @@ public sealed class Manager : MonoBehaviour {
 	[SerializeField][Range(1,7)] int _renderCntPerSteps = 1;
 
 
+	[Space]
+
+
 	// ------------------------------------- public メンバ ----------------------------------------
+
+	/** レンダリング方法 */
+	public RenderingMode renderingMode = RenderingMode.DirectRT;
+
 
 	/** 指定のパラメータでキューブマップ生成を開始する */
 	public void beginRender(
 		int texSize, float3 pos,
-		Action<Cubemap> onComplete,
+		Action<Texture> onComplete,
 		Action onBeginRenderPerFrame = null,
 		Action onEndRenderPerFrame = null
 	) {
@@ -43,7 +51,8 @@ public sealed class Manager : MonoBehaviour {
 			onComplete,
 			onBeginRenderPerFrame,
 			onEndRenderPerFrame,
-			_usePlugin
+			_blitShader,
+			renderingMode
 		) );
 
 		// 現在処理中のタスクがない場合は、即実行
@@ -106,6 +115,12 @@ public sealed class Manager : MonoBehaviour {
 
 
 	// --------------------------------------------------------------------------------------------
+#if UNITY_EDITOR
+	void OnValidate() {
+		if (_blitShader == null)
+			_blitShader = Shader.Find("CubemapGenerator/CubemapGenerator_BlitMaterial");
+	}
+#endif
 }
 
 }

@@ -3,7 +3,6 @@ using UnityEngine;
 
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
-using Unity.Collections;
 
 
 
@@ -12,13 +11,14 @@ namespace CubemapGenerator.Core {
 /**
  * キューブマップをレンダリングするコア処理部分。
  * 
+ * RTからCubemapにBlitして生成するバージョン。
  * Nativeプラグインを使用せずに、Unity内の機能のみで生成する。遅い。
  */
-sealed class Builder_NoUsePlugin : Builder_Base {
+sealed class Builder_BlitNoUsePlugin : Builder_Base {
 	// ------------------------------------- public メンバ ----------------------------------------
 
 	/** 使用するカメラ、パラメータを指定してレンダリングを開始する準備をする */
-	public Builder_NoUsePlugin(Camera camera, int texSize, float3 pos)
+	public Builder_BlitNoUsePlugin(Camera camera, int texSize, float3 pos)
 		: base(camera, texSize, pos) {}
 
 
@@ -61,7 +61,7 @@ sealed class Builder_NoUsePlugin : Builder_Base {
 	}
 
 	/** 各面をレンダリングした結果からキューブマップを生成する */
-	override protected Cubemap compileCubemap(UnityEngine.Rendering.ScriptableRenderContext context) {
+	override protected Texture compileCubemap(UnityEngine.Rendering.ScriptableRenderContext context) {
 		var ret = new Cubemap(_texSize, TextureFormat.ARGB32, 1);
 		for (int i=0; i<6; ++i)
 			_pixels[i].writeToCubemap( ret, (CubemapFace)i );
@@ -78,7 +78,7 @@ sealed class Builder_NoUsePlugin : Builder_Base {
 		foreach (var i in _pixels) i.Dispose();
 		_pixels = null;
 
-		if (_tmpTex2D!=null) UnityEngine.Object.DestroyImmediate(_tmpTex2D);
+		if (_tmpTex2D != null) UnityEngine.Object.DestroyImmediate(_tmpTex2D);
 		_tmpTex2D = null;
 	}
 

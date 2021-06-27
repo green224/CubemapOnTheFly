@@ -3,7 +3,6 @@ using UnityEngine;
 
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
-using Unity.Collections;
 
 
 namespace CubemapGenerator.Core {
@@ -18,14 +17,24 @@ sealed class BuilderPlan : IDisposable {
 
 	public BuilderPlan(
 		Camera camera, int texSize, float3 pos,
-		Action<Cubemap> onComplete,
+		Action<Texture> onComplete,
 		Action onBeginRender, Action onEndRender,
-		bool usePluginVer
+		Shader blitShader,
+		RenderingMode renderingMode
 	) {
-		if (usePluginVer)
-			_renderer = new Builder_UsePlugin(camera, texSize, pos);
-		else
-			_renderer = new Builder_NoUsePlugin(camera, texSize, pos);
+		switch (renderingMode) {
+		case RenderingMode.BlitNoUsePlugin :
+			_renderer = new Builder_BlitNoUsePlugin(camera, texSize, pos);
+			break;
+		case RenderingMode.BlitUsePlugin :
+			_renderer = new Builder_BlitUsePlugin(camera, texSize, pos);
+			break;
+		case RenderingMode.DirectRT :
+			_renderer = new Builder_DirectRT(camera, texSize, pos, blitShader);
+			break;
+		default : throw new ArgumentException();
+		}
+
 		_onComplete = onComplete;
 		_onBeginRender = onBeginRender;
 		_onEndRender = onEndRender;
@@ -73,7 +82,7 @@ sealed class BuilderPlan : IDisposable {
 
 	Builder_Base _renderer;
 	readonly Action _onBeginRender, _onEndRender;
-	Action<Cubemap> _onComplete;
+	Action<Texture> _onComplete;
 
 
 	~BuilderPlan() {
