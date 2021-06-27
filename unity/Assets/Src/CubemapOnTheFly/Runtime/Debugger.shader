@@ -1,5 +1,5 @@
 ﻿// キューブマップのデバッグ用マテリアル
-Shader "CubemapGenerator/CubemapGenerator_Debugger"
+Shader "CubemapOnTheFly/CubemapOnTheFly_Debugger"
 {
 	Properties
 	{

@@ -1,5 +1,5 @@
-// ƒLƒ…[ƒuƒ}ƒbƒv‚Ì–Ê‚ğƒŒƒ“ƒ_ƒŠƒ“ƒO‚·‚éÛ‚ÌABlit—pƒ}ƒeƒŠƒAƒ‹
-Shader "CubemapGenerator/CubemapGenerator_BlitMaterial"
+ï»¿// Cubemapã®å„é¢ã«RTã‚’Blitã™ã‚‹éš›ã«ä½¿ç”¨ã™ã‚‹ã‚·ã‚§ãƒ¼ãƒ€
+Shader "CubemapOnTheFly/CubemapOnTheFly_BlitMaterial"
 {
 	Properties
 	{

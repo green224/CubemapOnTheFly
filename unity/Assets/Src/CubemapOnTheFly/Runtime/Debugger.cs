@@ -8,7 +8,7 @@ namespace CubemapOnTheFly {
  * デバッグ用コンポーネント。
  * これを使用して挙動を確認することができる。
  */
-[AddComponentMenu("CubemapGenerator/CubemapGenerator_Debugger")]
+[AddComponentMenu("CubemapOnTheFly/CubemapOnTheFly_Debugger")]
 public sealed class Debugger : MonoBehaviour {
 	// --------------------------- インスペクタに公開しているフィールド -----------------------------
 

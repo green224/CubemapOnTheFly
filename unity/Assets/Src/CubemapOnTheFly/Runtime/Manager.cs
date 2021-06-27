@@ -13,7 +13,7 @@ namespace CubemapOnTheFly {
  * このコンポーネントを付けたオブジェクトをシーン上に配置して使用する。
  * （レンダリングするカメラの設定を使用者側でカスタムしたいので、このようにしている）
  */
-[AddComponentMenu("CubemapGenerator/CubemapGenerator_Manager")]
+[AddComponentMenu("CubemapOnTheFly/CubemapOnTheFly_Manager")]
 public sealed class Manager : MonoBehaviour {
 	// --------------------------- インスペクタに公開しているフィールド -----------------------------
 
@@ -118,7 +118,7 @@ public sealed class Manager : MonoBehaviour {
 #if UNITY_EDITOR
 	void OnValidate() {
 		if (_blitShader == null)
-			_blitShader = Shader.Find("CubemapGenerator/CubemapGenerator_BlitMaterial");
+			_blitShader = Shader.Find("CubemapOnTheFly/CubemapOnTheFly_BlitMaterial");
 	}
 #endif
 }
