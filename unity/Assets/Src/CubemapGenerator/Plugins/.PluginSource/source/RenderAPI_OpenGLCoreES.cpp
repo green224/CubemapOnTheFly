@@ -117,6 +117,10 @@ private:
 		// 参考：https://gamedev.net/forums/topic/632847-how-do-i-do-opengl-texture-blitting/4990712/
 		glBindFramebuffer(GL_FRAMEBUFFER, _frameBuffer);
 
+#if UNITY_ANDROID || UNITY_WEBGL
+		// TODO : ES2.0だとGL_COLOR_ATTACHMENT1が使えないので、代替コードを書く
+		// 参考：https://stackoverflow.com/questions/25439137/alternative-for-glblitframebuffer-in-opengl-es-2-0
+#else
 		// attach the textures to the frame buffer
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, srcTexTgt, srcTex, 0);
 		glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT1, dstTexTgt, dstTex, 0);
@@ -135,6 +139,7 @@ private:
 			0, 0, texWidth, texWidth,
 			GL_COLOR_BUFFER_BIT, GL_NEAREST
 		);
+#endif
 
 		glBindFramebuffer(GL_FRAMEBUFFER, 0); // Disable FBO when done
 	}
