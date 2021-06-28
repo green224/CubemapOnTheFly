@@ -60,6 +60,7 @@ sealed class Builder_DirectRT : Builder_Base {
 		Graphics.SetRenderTarget( _cubemapRT, 0, faceIndex );
 		Graphics.Blit( rt, s_blitMtl );
 		RenderTexture.active = null;
+		RenderTexture.ReleaseTemporary( rt );
 	}
 
 	/** 各面をレンダリングした結果からキューブマップを生成する */
