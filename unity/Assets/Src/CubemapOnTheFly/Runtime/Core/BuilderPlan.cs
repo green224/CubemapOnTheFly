@@ -18,7 +18,8 @@ sealed class BuilderPlan : IDisposable {
 	public BuilderPlan(
 		Camera camera, int texSize, float3 pos,
 		Action<Texture> onComplete,
-		Action onBeginRender, Action onEndRender,
+		Action<Camera, UnityEngine.Rendering.ScriptableRenderContext> onBeginRender,
+		Action<Camera, UnityEngine.Rendering.ScriptableRenderContext> onEndRender,
 		Shader blitShader,
 		RenderingMode renderingMode
 	) {
@@ -46,17 +47,18 @@ sealed class BuilderPlan : IDisposable {
 	 * 処理が全完了した場合はtrueを返す。
 	 */
 	public bool proceed(
+		Camera camera,
 		UnityEngine.Rendering.ScriptableRenderContext context,
 		ref int remainRenderableCnt
 	) {
-		_onBeginRender?.Invoke();
+		_onBeginRender?.Invoke(camera, context);
 
 		for (; 0<remainRenderableCnt; --remainRenderableCnt) {
 			_renderer.proceed(context);
 			if (_renderer.IsComplete) break;
 		}
 
-		_onEndRender?.Invoke();
+		_onEndRender?.Invoke(camera, context);
 
 		// レンダリング処理全完了チェック
 		if (_renderer.IsComplete) {
@@ -81,7 +83,8 @@ sealed class BuilderPlan : IDisposable {
 	// --------------------------------- private / protected メンバ -------------------------------
 
 	Builder_Base _renderer;
-	readonly Action _onBeginRender, _onEndRender;
+	readonly Action<Camera, UnityEngine.Rendering.ScriptableRenderContext>
+		_onBeginRender, _onEndRender;
 	Action<Texture> _onComplete;
 
 

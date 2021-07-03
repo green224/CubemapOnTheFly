@@ -4,6 +4,7 @@ using UnityEngine;
 using Unity.Mathematics;
 using static Unity.Mathematics.math;
 using System.Collections.Generic;
+using Unity.Collections;
 
 
 namespace CubemapOnTheFly {
@@ -40,31 +41,62 @@ public sealed class Manager : MonoBehaviour {
 
 
 	/** 指定のパラメータでキューブマップ生成を開始する */
-	public void beginRender(
+	public IDisposable beginRender(
 		int texSize, float3 pos,
 		Action<Texture> onComplete,
-		Action onBeginRenderPerFrame = null,
-		Action onEndRenderPerFrame = null
+		Action<Camera, UnityEngine.Rendering.ScriptableRenderContext> onBeginRenderPerFrame = null,
+		Action<Camera, UnityEngine.Rendering.ScriptableRenderContext> onEndRenderPerFrame = null
 	) {
-		_builderPlans.Enqueue( new Core.BuilderPlan(
+		var plan = new Core.BuilderPlan(
 			_camera, texSize, pos,
 			onComplete,
 			onBeginRenderPerFrame,
 			onEndRenderPerFrame,
 			_blitShader,
 			renderingMode
-		) );
+		);
+		_builderPlans.AddLast( plan );
 
 		// 現在処理中のタスクがない場合は、即実行
-		if (_curBldPlan == null)
-			_curBldPlan = _builderPlans.Dequeue();
+		if (_curBldPlan == null) {
+			_curBldPlan = _builderPlans.First.Value;
+			_builderPlans.RemoveFirst();
+		}
+
+		// 途中キャンセル用のハンドルを返す
+		return new CancelHandler(() => {
+			if (_curBldPlan == plan) {
+				_curBldPlan.Dispose();
+				_curBldPlan = null;
+			} else if (_builderPlans.Contains(plan)) {
+				_builderPlans.Remove(plan);
+				plan.Dispose();
+			}
+		});
+	}
+
+	/** 現在発行中のビルドを全キャンセルする */
+	public void cancelAll() {
+		// 現在実行中のレンダリングは予約されているものも含めて全てキャンセルして、
+		// 完了コールバックにnullを渡してキャンセルを通知する。
+		if (_curBldPlan != null) _curBldPlan.Dispose();
+		_curBldPlan = null;
+		foreach (var i in _builderPlans) i.Dispose();
+		_builderPlans.Clear();
 	}
 
 
 	// --------------------------------- private / protected メンバ -------------------------------
 
+	/** 発行したレンダリングをキャンセルするためのハンドル */
+	sealed class CancelHandler : IDisposable {
+		public CancelHandler(Action onDipose) { _onDipose = onDipose; }
+		public void Dispose() { _onDipose?.Invoke(); _onDipose = null; }
+		Action _onDipose;
+	}
+
 	/** レンダリングの予約用データ */
-	Queue<Core.BuilderPlan> _builderPlans = new Queue<Core.BuilderPlan>();
+	LinkedList<Core.BuilderPlan> _builderPlans = new LinkedList<Core.BuilderPlan>();
 
 	Core.BuilderPlan _curBldPlan;
 	Core.RenderFook _renderFook;
@@ -93,8 +125,14 @@ public sealed class Manager : MonoBehaviour {
 				// レンダリング可能数を全消費するまでレンダリングを進める
 				var remainRenderCnt = _renderCntPerSteps;
 				while ( _curBldPlan!=null && 0<remainRenderCnt ) {
-					if ( _curBldPlan.proceed(context, ref remainRenderCnt) )
-						_curBldPlan = _builderPlans.Count==0 ? null : _builderPlans.Dequeue();
+					if ( _curBldPlan.proceed(_camera, context, ref remainRenderCnt) ) {
+						if (_builderPlans.Count==0) {
+							_curBldPlan = null;
+						} else {
+							_curBldPlan = _builderPlans.First.Value;
+							_builderPlans.RemoveFirst();
+						}
+					}
 				}
 
 			}, null
@@ -104,13 +142,7 @@ public sealed class Manager : MonoBehaviour {
 	void OnDisable() {
 		_renderFook.Dispose();
 		_renderFook = null;
-
-		// 現在実行中のレンダリングは予約されているものも含めて全てキャンセルして、
-		// 完了コールバックにnullを渡してキャンセルを通知する。
-		if (_curBldPlan != null) _curBldPlan.Dispose();
-		_curBldPlan = null;
-		foreach (var i in _builderPlans) i.Dispose();
-		_builderPlans.Clear();
+		cancelAll();
 	}
 
 
