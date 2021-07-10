@@ -1,5 +1,5 @@
 ﻿// Cubemapの各面にRTをBlitする際に使用するシェーダ
-Shader "CubemapOnTheFly/CubemapOnTheFly_BlitMaterial"
+Shader "Hidden/CubemapOnTheFly/CubemapOnTheFly_BlitMaterial"
 {
 	Properties
 	{

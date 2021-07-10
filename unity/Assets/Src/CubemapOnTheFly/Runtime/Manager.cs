@@ -150,7 +150,7 @@ public sealed class Manager : MonoBehaviour {
 #if UNITY_EDITOR
 	void OnValidate() {
 		if (_blitShader == null)
-			_blitShader = Shader.Find("CubemapOnTheFly/CubemapOnTheFly_BlitMaterial");
+			_blitShader = Shader.Find("Hidden/CubemapOnTheFly/CubemapOnTheFly_BlitMaterial");
 	}
 #endif
 }
