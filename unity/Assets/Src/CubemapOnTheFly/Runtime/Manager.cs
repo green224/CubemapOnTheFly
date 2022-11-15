@@ -14,6 +14,7 @@ namespace CubemapOnTheFly {
  * このコンポーネントを付けたオブジェクトをシーン上に配置して使用する。
  * （レンダリングするカメラの設定を使用者側でカスタムしたいので、このようにしている）
  */
+[ExecuteAlways]
 [AddComponentMenu("CubemapOnTheFly/CubemapOnTheFly_Manager")]
 public sealed class Manager : MonoBehaviour {
 	// --------------------------- インスペクタに公開しているフィールド -----------------------------
